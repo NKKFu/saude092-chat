@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hello world</title>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+<body>
+    <div>
+        <h3 id="status">Status: </h3>
+        <button onclick="ConnectToServer('admin')">ENTRAR EM UMA SALA</button>
+        <br />
+
+        <div id="chat-history" style="height: 400px; color: black; overflow:scroll;" class="p-3 bg-light rounded-top">
+            <div>
+                <div class="p-3 rounded mb-3 shadow-sm"
+                    style="margin-left: 20%; width: 80%; background-color: rgb(231, 231, 231)">
+                    <h5>Olá, eu sou um funcionário do Ministério Público de Saúde, como posso ajudar?
+                    </h5>
+                </div>
+            </div>
+        </div>
+        <script>
+            const div = document.getElementById("chat-history");
+            div.scrollTop = div.scrollHeight;
+
+            let socket, roomID;
+
+            function ConnectToServer(key) {
+                socket = io('http://localhost:3000/');
+                socket.on('connect', function (data) {
+                    socket.emit('JoinRoom', key);
+                });
+
+
+                socket.on('connectToRoom', function (data) {
+                    document.getElementById('status').innerHTML = "Status: você está em uma sala, N° " + data;
+                    roomID = data;
+                });
+
+                socket.on('message', function (author, msg) {
+                    if (msg.length < 1)
+                        return;
+
+                    const cardHolder = document.createElement('div');
+
+                    const messageCard = document.createElement('div');
+                    messageCard.classList.add("p-3", "rounded", "my-3", "shadow-sm");
+                    messageCard.style = "width: 80%; background-color: #fff";
+
+                    const messageContent = document.createElement('h5');
+                    messageContent.innerHTML = msg;
+                    messageCard.appendChild(messageContent);
+
+                    cardHolder.appendChild(messageCard);
+
+                    document.getElementById('chat-history').appendChild(cardHolder);
+
+                    const div = document.getElementById("chat-history");
+                    div.scrollTop = div.scrollHeight;
+                });
+            }
+
+            function sendMessage() {
+                if (!socket)
+                    return;
+
+                const cardHolder = document.createElement('div');
+
+                const msgValue = document.getElementById('chat-input').value;
+                document.getElementById('chat-input').value = "";
+
+                socket.emit('messageToServer', 'SAUDE', roomID, msgValue);
+
+                const messageCard = document.createElement('div');
+                messageCard.classList.add("p-3", "rounded", "my-3", "shadow-sm");
+                messageCard.style = "margin-left:20%; width: 80%; background-color: rgb(231, 231, 231)";
+
+                const messageContent = document.createElement('h5');
+                messageContent.innerHTML = msgValue;
+                messageCard.appendChild(messageContent);
+
+                cardHolder.appendChild(messageCard);
+
+                document.getElementById('chat-history').appendChild(cardHolder);
+
+                const div = document.getElementById("chat-history");
+                div.scrollTop = div.scrollHeight;
+            }
+        </script>
+        <div class="d-flex">
+            <input id="chat-input" class="form-control form-control-lg" style="height: 60px; border-radius: 0;"
+                type="text" placeholder="Digite algo..">
+
+            <button onclick="sendMessage()" type="button" style="height: 60px; border-radius: 0;"
+                class="px-5 py-3 btn btn-primary">ENVIAR</button>
+        </div>
+    </div>
+</body>
+
+</html>
