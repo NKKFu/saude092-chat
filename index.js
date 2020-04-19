@@ -20,9 +20,10 @@ io.on('connection', function (socket) {
                 if (roomsList.rooms["room-" + i] && roomsList.rooms["room-" + i].length == 1) {
                     socket.join("room-" + i);
                     socket.emit('connectToRoom', i);
-                    break;
+                    return;
                 }
             }
+            socket.emit('errorToJoin');
         }
     });
 
