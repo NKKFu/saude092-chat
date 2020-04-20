@@ -31,8 +31,8 @@ io.on('connection', function (socket) {
         socket.to("room-" + roomID).emit('message', author, msg)
     });
 
-    socket.on('CancelToServer', (roomID) => {
-        socket.to("room-" + roomID).emit('cancel')
+    socket.on('CancelToServer', (arg1) => {
+        socket.to("room-" + arg1).emit('cancel');
     });
 
     const roomsList = io.nsps['/'].adapter;
